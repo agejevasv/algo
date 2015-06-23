@@ -1,6 +1,7 @@
 package algo
 
 import Ordering.Implicits._
+import scala.reflect.ClassTag
 
 /**
  * Quick sort implementation.
@@ -23,7 +24,40 @@ import Ordering.Implicits._
  */
 class QuickSort {
 
-  def sort[T: Ordering](list: List[T]): List[T] = ???
+  def sort[T](list: List[T])(implicit evidence: ClassTag[T], ordering: Ordering[T]): List[T] =
+    sort(list.toArray, 0, list.size - 1).toList
+
+  private def sort[T: Ordering](array: Array[T], lo: Int, hi: Int): Array[T] =
+    if (lo < hi) {
+      val p = partition(array, lo, hi)
+      sort(array, lo, p - 1)
+      sort(array, p + 1, hi)
+    } else {
+      array
+    }
+
+  private def partition[T: Ordering](array: Array[T], lo: Int, hi: Int): Int = {
+    val pivotIndex = lo + (hi - lo) / 2
+    val pivotValue = array(pivotIndex)
+    var storeIndex = lo
+
+    swap(array, pivotIndex, hi)
+
+    for(i <- lo until hi)
+      if (array(i) < pivotValue) {
+        swap(array, i, storeIndex)
+        storeIndex += 1
+      }
+
+    swap(array, storeIndex, hi)
+    storeIndex
+  }
+
+  private def swap[T](array: Array[T], fromIndex: Int, toIndex: Int) = {
+    val temp = array(fromIndex)
+    array(fromIndex) = array(toIndex)
+    array(toIndex) = temp
+  }
 
 }
 
